@@ -2,10 +2,11 @@ var express = require('express');
 var router = express.Router();
 const userModel = require('./users');
 const passport = require('passport');
+const upload = require("./multer");
 const localStrategy = require('passport-local');
 passport.use(new localStrategy(userModel.authenticate()));
 
-router.get('/login', function(req, res, next) {
+router.get('/', function(req, res, next) {
   res.render('index');
 });
 
@@ -13,9 +14,18 @@ router.get('/register', function(req,res,next){
  res.render('register');
 });
 
-router.get('/profile', isLoggedIn, function(req,res,next){
-  res.render('profile');
+router.get('/profile', isLoggedIn, async function(req,res,next){
+  const user = await userModel.findOne({username : req.session.passport.user});
+  res.render('profile', {user})
 });
+
+router.post('/uploadfile', isLoggedIn, upload.single('file'), async function(req,res,next){
+  const user = await userModel.findOne({username : req.session.passport.user});
+  user.profileImage = req.file.filename;
+  await user.save();
+  res.redirect("/profile");
+});
+
  
 router.post('/register', function(req,res,next){
     const user = new userModel({
@@ -31,7 +41,7 @@ router.post('/register', function(req,res,next){
 })
 
 router.post('/login',passport.authenticate("local",{
-  failureRedirect:"/login",
+  failureRedirect:"/",
   successRedirect:"/profile"
 }), function(req,res,next){
 })
@@ -39,7 +49,7 @@ router.post('/login',passport.authenticate("local",{
 router.get('/logout', function(req, res, next){
   req.logout(function(err) {
     if (err) { return next(err); }
-    res.redirect('/login');
+    res.redirect('/');
   });
 });
 
