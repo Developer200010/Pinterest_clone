@@ -20,6 +20,8 @@ router.get('/add', function(req,res,next){
   res.render('add', {nav:true});
 });
 
+
+
 router.post('/createPost', isLoggedIn, upload.single('postImage'), async function(req,res,next){
   const user = await userModel.findOne({username : req.session.passport.user});
   const post=await postModel.create({
@@ -36,6 +38,12 @@ router.post('/createPost', isLoggedIn, upload.single('postImage'), async functio
 router.get('/profile', isLoggedIn, async function(req,res,next){
   const user = await userModel.findOne({username : req.session.passport.user}).populate("posts");
   res.render('profile', {user, nav:true})
+});
+
+router.get('/show/posts', isLoggedIn , async function(req,res,next){
+  const user = await userModel.findOne({username : req.session.passport.user}).populate("posts");
+  console.log(user);
+  res.render('show', {user, nav:true});
 });
 
 router.post('/createPost', isLoggedIn,upload.single("postImage"), async function(req,res,next){
