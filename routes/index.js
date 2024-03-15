@@ -42,9 +42,20 @@ router.get('/profile', isLoggedIn, async function(req,res,next){
 
 router.get('/show/posts', isLoggedIn , async function(req,res,next){
   const user = await userModel.findOne({username : req.session.passport.user}).populate("posts");
-  console.log(user);
   res.render('show', {user, nav:true});
 });
+
+router.get('/show/posts/cardDetails', isLoggedIn , async function(req,res,next){
+  const user = await userModel.findOne({username : req.session.passport.user}).populate("posts");
+  res.render('singlePost', {user, nav:false});
+});
+
+router.get('/feed', isLoggedIn , async function(req,res,next){
+  const user = await userModel.findOne({username : req.session.passport.user});
+  const posts = await postModel.find().populate("user");
+  res.render('feed', {user,posts, nav:true});
+});
+
 
 router.post('/createPost', isLoggedIn,upload.single("postImage"), async function(req,res,next){
   const user = await userModel.findOne({username : req.session.passport.user});
